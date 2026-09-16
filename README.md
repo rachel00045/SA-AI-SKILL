@@ -20,4 +20,4 @@
 - 不會自動開立 TFS、部署、push、修改正式資料或執行不可逆 migration。
 - 這是一個非官方社群整合流程；使用前請先檢查 workspace 的資料分類與連線權限。
 
-完整流程請見 [SKILL.md](SKILL.md)。測試情境請見 [evals/evals.json](evals/evals.json)。
+完整流程請見 [skill/SKILL.md](skill/SKILL.md)。測試情境請見 [skill/evals/evals.json](skill/evals/evals.json)。
