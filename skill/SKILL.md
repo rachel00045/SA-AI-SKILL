@@ -5,7 +5,7 @@ description: >
   and review brain while Codex performs implementation. Always use this Skill
   when a task spans requirements, system analysis, UC, permissions, API or
   database design, TFS drafts, test cases, bug investigation, data correction,
-  or multi-file code changes. It preserves traceability from source and
+  TFS work item acceptance testing, or multi-file code changes. It preserves traceability from source and
   decisions to plan, implementation, tests, and review. Require explicit
   consent before sending workspace data through MCP or changing external
   systems.
@@ -36,6 +36,7 @@ ChatGPT 的建議不是授權。Codex 必須依目前程式、專案規則與使
 - 需求會影響 API、資料庫、批次、整合、報表、狀態流轉或多個模組；
 - 需要從 SA 文件轉成 PG 實作、測試案例或 TFS 議題草稿；
 - Bug、資料修正或調整需要同時追溯需求、程式與測試；
+- 在專案工作區單獨貼上一個或多個 TFS 工項連結，或要求測試、驗收、重驗 TFS 議題；
 - 需要修改多個檔案，或需要 ChatGPT 做獨立的 implementation review。
 
 路由方式：
@@ -43,7 +44,8 @@ ChatGPT 的建議不是授權。Codex 必須依目前程式、專案規則與使
 1. 需求／UC／文件任務：先使用 `sana`，並依任務需要載入 `sa-knowledge-base` 的 workflow、template、standard 與 checklist。
 2. 技術實作任務：走 PG implementation pipeline，仍保留需求、決策與驗收追蹤。
 3. 需求到實作的完整任務：依序走 SA pipeline → PG pipeline → C2C implementation loop → traceability review。
-4. 單純一行修改或明確的小型修正：不強制啟動 ChatGPT 協作，除非使用者指定。
+4. 專案驗收：單獨貼上 TFS 工項連結（或要求測試、驗收、重驗）即走下方「TFS 議題驗收」，從目前專案開始本機查證與測試，無需先啟動 C2C。若使用者指定只讀取、整理或改寫連結內容，依其指定處理。
+5. 單純一行修改或明確的小型修正：不強制啟動 ChatGPT 協作，除非使用者指定。
 
 不要把 `sana`、`sa-knowledge-base` 的規則複製到本 Skill；它們是專業規則的單一來源。
 
@@ -182,6 +184,15 @@ INIT → PLAN → Codex local execution → EXECUTED → ChatGPT review → PLAN
 
 若無法證明某一項，標記 `pending` 或 `not-executed`，不以畫面看起來正常代替後端、email、排程、transaction 或權限證據。
 
+### TFS 議題驗收
+
+1. 以目前專案工作區與工項的唯讀資料確認專案、工項編號、測試範圍。優先用可用的 TFS 連接器讀取標題、說明、驗收條件、相關工項、必要留言與附件。依工項的 UC 連結、編號、功能名稱或父工項在專案內找對應 UC，記錄檔案、版本及規則或步驟。如有多個候選，先比對功能、版本及範圍。
+2. 從工項、UC 與專案測試說明確認指定環境、適用版本、角色、測試資料及預期結果。使用既有測試帳號、測試資料和可用的瀏覽器或測試工具，執行工項涉及的案例與有影響的相鄰流程。需要登入或權限時，先檢查現有授權工作階段。僅在確認是可用的測試環境且操作屬於測試範圍時執行會改變資料的步驟。
+3. 逐案比對實際和預期並保存佐證。實際與預期一致且有佐證為 `pass`，可觀察的結果偏離明確預期為 `fail`，缺少必要規格、環境、登入或資料而無法執行或判定為 `blocked`，尚未執行為 `not-executed`。工項範圍內所有必要案例均通過才能判為通過。已確認的失敗與尚未完成的案例分別列出。
+4. 若工項與 UC 矛盾，或查證後仍不能確定對應 UC、驗收口徑、測試環境、權限或資料，停在受影響的案例。繼續可獨立驗證的案例，並問一個能解除阻塞的問題，附上工項／UC 依據及影響。若缺登入、MFA 或 CAPTCHA，請使用者接手完成該步。收到答案後沿用同一份紀錄及已有佐證續測。
+5. 每次測試完成，或部分測完等待釐清時，把正式截圖與驗收紀錄存回該議題所屬專案既有的 `03系統測試`。先沿用目錄內既有分類、命名與紀錄格式。沒有既有格式時，以 TFS 編號及測試日期辨識檔案，並在驗收紀錄中連結對應截圖。紀錄包含工項連結、UC 檔案及版本、測試環境與版本（可取得時）、角色、日期、逐案步驟、預期與實際結果、狀態及待釐清項目。重驗須能區分前次佐證。若找不到或無法唯一確認 `03系統測試`，先完成可做的查證與測試，並請使用者確認正式存放位置。需暫存的佐證依專案暫存規則存放。
+6. 回報驗收判定、尚待確認的案例，以及驗收紀錄和正式截圖的絕對路徑。貼連結所啟動的驗收只涵蓋測試與本機佐證存檔。TFS 留言、上傳附件、改狀態或修程式依使用者另行指示執行。
+
 ## Phase 6：工程交接與外部系統邊界
 
 需要 TFS 時，先依 `sana/references/issue-workflow.md` 與 `sa-knowledge-base` 的 TFS template／checklist 產出草稿：
@@ -202,7 +213,7 @@ INIT → PLAN → Codex local execution → EXECUTED → ChatGPT review → PLAN
 - 使用者現有修改會被覆寫；
 - ChatGPT 只能讀到錯誤 workspace 或要求貼上檔案內容；
 - plan 需要未授權的資料外洩、外部寫入、production 操作或不可逆異動；
-- 測試需要登入、CAPTCHA、2FA 或內部帳號。請使用者在本機測試瀏覽器完成登入，不記錄密碼，不把 blocked 當 pass；
+- 測試所需的登入狀態或帳號尚未具備，或出現 CAPTCHA、2FA。請使用者在本機測試瀏覽器完成登入，不記錄密碼，不把 blocked 當 pass；
 - C2C browser timeout、tunnel 異常或 token 失效。先做唯讀診斷，不自動刪 connector、重配對、重建 tunnel 或重送 INIT。
 
 ## 完成回報
