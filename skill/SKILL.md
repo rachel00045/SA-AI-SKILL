@@ -4,7 +4,7 @@ description: >
   Orchestrate complex SA and PG work by using ChatGPT as a read-only planning
   and review brain while Codex performs implementation. Always use this Skill
   when a task spans requirements, system analysis, UC, permissions, API or
-  database design, TFS drafts, test cases, bug investigation, data correction,
+  database design, TFS issue drafting or creation, test cases, bug investigation, data correction,
   TFS work item acceptance testing, or multi-file code changes. It preserves traceability from source and
   decisions to plan, implementation, tests, and review. Require explicit
   consent before sending workspace data through MCP or changing external
@@ -34,7 +34,7 @@ ChatGPT 的建議不是授權。Codex 必須依目前程式、專案規則與使
 
 - 需求整理、功能分析、UC、欄位規格、流程、權限或商業規則需要釐清；
 - 需求會影響 API、資料庫、批次、整合、報表、狀態流轉或多個模組；
-- 需要從 SA 文件轉成 PG 實作、測試案例或 TFS 議題草稿；
+- 需要從 SA 文件轉成 PG 實作、測試案例或 TFS 議題草稿，或要求開議題、開工項或整理 TFS 草稿；
 - Bug、資料修正或調整需要同時追溯需求、程式與測試；
 - 在專案工作區單獨貼上一個或多個 TFS 工項連結，或要求測試、驗收、重驗 TFS 議題；
 - 需要修改多個檔案，或需要 ChatGPT 做獨立的 implementation review。
@@ -45,7 +45,8 @@ ChatGPT 的建議不是授權。Codex 必須依目前程式、專案規則與使
 2. 技術實作任務：走 PG implementation pipeline，仍保留需求、決策與驗收追蹤。
 3. 需求到實作的完整任務：依序走 SA pipeline → PG pipeline → C2C implementation loop → traceability review。
 4. 專案驗收：單獨貼上 TFS 工項連結（或要求測試、驗收、重驗）即走下方「TFS 議題驗收」，從目前專案開始本機查證與測試，無需先啟動 C2C。若使用者指定只讀取、整理或改寫連結內容，依其指定處理。
-5. 單純一行修改或明確的小型修正：不強制啟動 ChatGPT 協作，除非使用者指定。
+5. TFS 開單：整理、改寫或建立工項走「整理與開立 TFS 議題」，依請求決定交付草稿或正式建立。
+6. 單純一行修改或明確的小型修正：不強制啟動 ChatGPT 協作，除非使用者指定。
 
 不要把 `sana`、`sa-knowledge-base` 的規則複製到本 Skill；它們是專業規則的單一來源。
 
@@ -195,14 +196,17 @@ INIT → PLAN → Codex local execution → EXECUTED → ChatGPT review → PLAN
 
 ## Phase 6：工程交接與外部系統邊界
 
-需要 TFS 時，先依 `sana/references/issue-workflow.md` 與 `sa-knowledge-base` 的 TFS template／checklist 產出草稿：
+需要整理 TFS 議題或開立新工項時，進入下方流程。只處理議題內容或開單時，可從專案工作區直接開始，無需啟動 C2C。
 
-- 功能／Task、Bug、Investigation、資料修正／維運分開；
-- title、背景、重現／實作步驟、actual、expected、環境、角色、版本與證據完整；
-- 連結 UC、規則、測試、依賴與待確認事項；
-- 標示「草稿，待 SA 審核」。
+### 整理與開立 TFS 議題
 
-沒有使用者另外授權與可用 connector 時，不得建立、指派、送出、發布 TFS、PR、commit、push 或部署。產出草稿不代表外部系統已異動。
+1. 先確認目前專案、功能、工項目的和需求來源。讀取專案的 `AGENTS.md`、開單範本及對應 UC／測試證據。使用 `tfs-issue-opening` 整理內容；未安裝時仍可依本節產出文字草稿，並用 `sana` 與 `sa-knowledge-base` 補足來源追溯。
+2. 有明確父工項時先查證。僅有功能名稱時，先找標題完全相符的工項，再查關鍵字候選及其子工項。比對同父代下 3～5 筆最相近的同類工項（不足時使用現有案例），並查重複。父代候選相近或缺必要資訊時，整理已知內容與候選依據，再請使用者確認。
+3. 依序採用使用者指定格式、已查證的同父代同類工項、同專案同模組工項。缺少範本時，使用「說明、路徑、需求、預期結果」四段。標題包含類型、對象及具體動作，前綴依專案慣例。描述預設用一般字重的縮排清單，依需要使用編號子清單，圖片置於對應段落，以 `(圖N)` 標示。Bug 寫明環境、重現步驟、實際及預期結果，推測的根因保留待確認。從驗收失敗開單時，引用對應 UC、失敗案例及可分享的佐證。
+4. 草稿列出標題、描述、格式依據、建議父代與查重結果，以及工項類型、指派、優先順序／分級、反覆項目、標記、關聯和圖片。依同類工項推導的設定標為建議。**只有使用者在當次明確指定時才加「版更測試機」標記**，即使同類工項已有此標記亦同。
+5. 只要求整理、改寫或草稿時，交付可直接貼入 TFS 的內容。正式建立須先完成可檢查的草稿，取得對工項設定及寫入的授權後，再用 `tfs-create-workitem` 和可用的 TFS 連接器執行。多張相依工項依 `tfs-work-item-breakdown` 處理；修改既有工項依 `tfs-update-workitem` 處理。建立後回讀核對欄位、父子／正式關聯、描述格式和圖文位置，再回報工項 ID 與連結。缺少建立技能或連接器時，交付草稿並標示建立未執行。
+
+其他外部寫入（指派、發布、PR、commit、push 或部署）依使用者授權與可用工具執行。
 
 ## 例外與停止條件
 
