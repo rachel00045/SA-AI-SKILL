@@ -1,20 +1,10 @@
 ---
-name: sa-pg-chatgpt-codex
-description: >
-  Orchestrate complex SA and PG work by using ChatGPT as a read-only planning
-  and review brain while Codex performs implementation. Always use this Skill
-  when a task spans requirements, system analysis, UC, permissions, API or
-  database design, TFS issue drafting or creation, test cases, bug investigation, data correction,
-  TFS work item acceptance testing, or multi-file code changes. It preserves traceability from source and
-  decisions to plan, implementation, tests, and review. Require explicit
-  consent before sending workspace data through MCP or changing external
-  systems.
-compatibility: Requires the sana and sa-knowledge-base Skills. For ChatGPT
-  planning, requires a reviewed, user-approved read-only codex-with-chatgpt
-  connection and a compatible Codex in-app browser.
+name: sa-ai-skill
+description: Analyze requirements and UC, draft or create TFS work items, and verify acceptance in a project workspace. Use for SA/PG planning, implementation, and review.
+compatibility: Full SA and UC work uses sana and sa-knowledge-base. Live TFS and acceptance tasks need authorized TFS access and suitable project tools. Optional C2C requires an approved read-only codex-with-chatgpt bridge and a compatible Codex in-app browser.
 ---
 
-# SA／PG ChatGPT-Codex 協作 Skill
+# SA-AI-SKILL
 
 ## 目的與角色分工
 
@@ -225,7 +215,7 @@ INIT → PLAN → Codex local execution → EXECUTED → ChatGPT review → PLAN
 先給結果，再給必要證據，並使用以下結構：
 
 ```text
-SA／PG ChatGPT-Codex 協作結果
+SA-AI-SKILL 協作結果
 
 狀態：完成／部分完成／待確認／阻塞
 需求與決策：<摘要>

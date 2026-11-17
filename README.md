@@ -2,6 +2,34 @@
 
 適合 SA 與 PG 的 Codex Skill：由 ChatGPT 透過唯讀 MCP 負責需求理解、方案規劃與實作 Review，再由 Codex 在本機執行程式修改、測試與驗證。
 
+## 安裝與環境
+
+下載本 repo，取出完整的 [`sa-ai-skill` 資料夾](sa-ai-skill)。資料夾名稱與 `SKILL.md` 的 `name` 都是 `sa-ai-skill`。
+
+| 平台 | 安裝方式 |
+| --- | --- |
+| Codex | 將資料夾放到專案的 `.agents/skills/`，或放到使用者的 `~/.agents/skills/` 供各專案使用。到目標專案開啟聊天，從 Skill 選單選用 `sa-ai-skill`，或使用下方範例。 |
+| Claude Code | 將資料夾放到專案的 `.claude/skills/`，或使用者的 `~/.claude/skills/`。在目標專案執行 `/sa-ai-skill`。 |
+| Claude 網頁版 | 將 `sa-ai-skill` 資料夾單獨壓成 ZIP，確認第一層是 `sa-ai-skill/`，再到 Customize → Skills 上傳並啟用。 |
+| 其他 AI | 支援 Agent Skills 的工具可依其規則安裝此資料夾。一般聊天可提供 `SKILL.md` 和授權使用的資料，讓 AI 依流程產出草稿或驗收計畫。 |
+
+官方說明：[Codex Skills](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills)、[Claude Code Skills](https://code.claude.com/docs/en/skills#choose-where-skills-load)、[Claude 自訂 Skill 上傳](https://support.claude.com/en/articles/12512198-how-to-create-custom-skills)。
+
+### 按功能另行準備
+
+輔助 Skill 請向團隊取得並安裝到同一個 AI 環境。公司 TFS 連接器需在該環境另行設定，並確認使用者有相應專案權限。若 TFS 或測試站限內網存取，執行環境也需要能連到該站點。
+
+| 功能 | 輔助 Skill | 連接器與專案環境 |
+| --- | --- | --- |
+| 需求分析、UC、規格與測試追溯 | `sana`、`sa-knowledge-base` | 提供需求來源、對應 UC 與專案檔案。若需修改程式及跑測試，執行環境也要有專案要求的工具與相依套件。 |
+| 整理 TFS 議題草稿 | `tfs-issue-opening` 提供完整開單格式與專案範本。缺少時仍可依本 Skill 整理文字草稿。 | 要從連結查工項、父代、同類範本或重複項目，需唯讀 TFS 介面。若只能離線整理，請提供可分享的工項資料。 |
+| 正式建立或更新 TFS 工項 | 新建用 `tfs-create-workitem`，拆分多張相依工項用 `tfs-work-item-breakdown`，更新既有工項用 `tfs-update-workitem`。 | 需要可讀寫的 TFS 連接器與對應權限。[開立流程](sa-ai-skill/SKILL.md#整理與開立-tfs-議題)說明草稿、授權與建立後回讀。 |
+| 貼 TFS 連結並執行驗收 | 驗收流程已包含在本 Skill。 | 需要能讀工項的 TFS 介面、能操作並截圖的瀏覽器或測試工具、測試環境與有權限的測試帳號。執行環境須能讀取專案 UC，並寫入該專案既有的 `03系統測試`。 |
+| ChatGPT 第二審與 Codex 實作協作 | 使用本 Skill 的 C2C 流程。 | 另行配置經審核與授權的唯讀 `codex-with-chatgpt` MCP bridge，以及相容的 Codex 內建瀏覽器。此設定只在啟用 C2C 時需要。 |
+
+瀏覽器、本機檔案與內網能力視 AI 平台和工作階段而定。可載入 Skill 後，先確認它能在目標專案讀取 UC 和 TFS 工項，再執行驗收。
+
+
 ## 使用方式
 
 ### 驗收 TFS 議題
@@ -47,4 +75,4 @@ Codex 會查找對應的父工項與同類議題，檢查是否重複，再提�
 - 不會自動開立 TFS、部署、push、修改正式資料或執行不可逆 migration。
 - 這是一個非官方社群整合流程；使用前請先檢查 workspace 的資料分類與連線權限。
 
-完整流程請見 [skill/SKILL.md](skill/SKILL.md)。測試情境請見 [skill/evals/evals.json](skill/evals/evals.json)。
+完整流程請見 [sa-ai-skill/SKILL.md](sa-ai-skill/SKILL.md)。測試情境請見 [sa-ai-skill/evals/evals.json](sa-ai-skill/evals/evals.json)。
