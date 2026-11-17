@@ -1,4 +1,4 @@
-# SA／PG ChatGPT-Codex
+# SA-AI-SKILL
 
 適合 SA 與 PG 的 Codex Skill：由 ChatGPT 透過唯讀 MCP 負責需求理解、方案規劃與實作 Review，再由 Codex 在本機執行程式修改、測試與驗證。
 
@@ -22,7 +22,7 @@ https://tfs.example.com/DefaultCollection/專案名稱/_workitems/edit/12345
 安裝後可使用下列指令開始：
 
 ```text
-使用 SA／PG ChatGPT-Codex，先分析這個需求，再規劃並實作。
+使用 SA-AI-SKILL，先分析這個需求，再規劃並實作。
 ```
 
 本 Skill 會依任務需要串接 `sana` 與 `sa-knowledge-base`，保留需求、決策、UC、測試、TFS 草稿與程式變更之間的追溯關係。
