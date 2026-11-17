@@ -1,6 +1,6 @@
 # SA-AI-SKILL
 
-適合 SA 與 PG 的 Codex Skill：由 ChatGPT 透過唯讀 MCP 負責需求理解、方案規劃與實作 Review，再由 Codex 在本機執行程式修改、測試與驗證。
+適合 SA 與 PG 的 Skill，可在 Codex 或 Claude 按專案執行需求分析、UC、議題草稿與驗收。Codex 可按需搭配 ChatGPT 做唯讀第二審。
 
 ## 安裝與環境
 
@@ -21,7 +21,7 @@
 
 | 功能 | 輔助 Skill | 連接器與專案環境 |
 | --- | --- | --- |
-| 需求分析、UC、規格與測試追溯 | `sana`、`sa-knowledge-base` | 提供需求來源、對應 UC 與專案檔案。若需修改程式及跑測試，執行環境也要有專案要求的工具與相依套件。 |
+| 需求分析、UC、規格與測試追溯 | 已內建 [Sana 流程](sa-ai-skill/references/sana-workflow.md)，無需另裝 Skill。 | 提供需求來源、對應 UC 與專案檔案。若需修改程式及跑測試，執行環境也要有專案要求的工具與相依套件。 |
 | 整理 TFS 議題草稿 | `tfs-issue-opening` 提供完整開單格式與專案範本。缺少時仍可依本 Skill 整理文字草稿。 | 要從連結查工項、父代、同類範本或重複項目，需唯讀 TFS 介面。若只能離線整理，請提供可分享的工項資料。 |
 | 正式建立或更新 TFS 工項 | 新建用 `tfs-create-workitem`，拆分多張相依工項用 `tfs-work-item-breakdown`，更新既有工項用 `tfs-update-workitem`。 | 需要可讀寫的 TFS 連接器與對應權限。[開立流程](sa-ai-skill/SKILL.md#整理與開立-tfs-議題)說明草稿、授權與建立後回讀。 |
 | 貼 TFS 連結並執行驗收 | 驗收流程已包含在本 Skill。 | 需要能讀工項的 TFS 介面、能操作並截圖的瀏覽器或測試工具、測試環境與有權限的測試帳號。執行環境須能讀取專案 UC，並寫入該專案既有的 `03系統測試`。 |
@@ -65,12 +65,12 @@ Codex 會查找對應的父工項與同類議題，檢查是否重複，再提�
 使用 SA-AI-SKILL，先分析這個需求，再規劃並實作。
 ```
 
-本 Skill 會依任務需要串接 `sana` 與 `sa-knowledge-base`，保留需求、決策、UC、測試、TFS 草稿與程式變更之間的追溯關係。
+本 Skill 使用內建的 Sana 流程，保留需求、決策、UC、測試、TFS 草稿與程式變更之間的追溯關係。
 
 ## 安全原則
 
-- ChatGPT 只透過 MCP 讀取必要資料，沒有寫檔或執行 shell 權限。
-- 第一次連線前會告知程式碼、diff 與測試摘要可能傳送至 ChatGPT。
+- 選用 ChatGPT 第二審時，ChatGPT 只透過 MCP 讀取必要資料，沒有寫檔或執行 shell 權限。
+- 啟用第二審並第一次連線前會告知程式碼、diff 與測試摘要可能傳送至 ChatGPT。
 - 不會自動建立 public tunnel、修改 Codex 設定、安裝套件、更新 Skill 或刪除 connector。
 - 不會自動開立 TFS、部署、push、修改正式資料或執行不可逆 migration。
 - 這是一個非官方社群整合流程；使用前請先檢查 workspace 的資料分類與連線權限。
